@@ -226,6 +226,8 @@ Function reference
     | Return type       | Description
     | ----------------- | -----------------------------------------------------------------------------------------------                                          
     | _void_            | Technically returns always true, but do not use it or rely on it.        
+    
+    _**Note:**_ This function takes care of disabling **AEN** beforehand and enabling it afterwards if necessary. This is done to prevent irregular spikes in measurements while changing gain values.    
 .
 - **_setIntegration_ (** int **)**    
 
