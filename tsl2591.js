@@ -25,7 +25,7 @@ const
     waitForValidAls = (tsl, cb, _) => _ = setInterval(() => tsl.isAlsValid() && !clearInterval(_) && cb.call(tsl), 10),
     isSaturated = (ch0, ch1, int) => [ch0, ch1].indexOf([0x8FFFF, 0xFFFF][~~int]) !== -1;
 
-let TSL2591 = function (i2c)
+let TSL2591 = module.exports = function (i2c)
 {
     this._i2c = i2c;
 
@@ -41,8 +41,13 @@ let TSL2591 = function (i2c)
     this._int = this.getIntegration();
     this._enabled = read(this, R.ENABLE, 1)[0];
 
-    this.powerOff();
+    this.setToSleep();
 };
+
+TSL2591.LIGHT = L;
+TSL2591.GAIN = G;
+TSL2591.INTEGRATIONTIME = I;
+TSL2591.ENABLE = E;
 
 TSL2591.prototype = {
     isSaiEnabled: () => !!(read(this, R.ENABLE, 1)[0] & E.SAI),
@@ -51,7 +56,7 @@ TSL2591.prototype = {
     isAlsEnabled: () => !!(read(this, R.ENABLE, 1)[0] & E.AEN),
     enable: enable => isValidEnable(enable) && (this._enabled = enable | E.AEN | E.PON, true) && setEnable(this),
     disable: disable => isValidEnable(this._enabled & ~disable) && (this._enabled &= ~disable, true) && setEnable(this),
-    powerOff: () => (this._enabled = 0, true) && setEnable(this),
+    setToSleep: () => (this._enabled = 0, true) && setEnable(this),
     setIntegration: int => isValidIntegration(int) && (this._int = int, true) && setControl(this),
     setGain: gain => isValidGain(gain) && (this._gain = gain, true) && handleAen(this, setControl.bind(null, this)),
     getIntegration: () => read(this, R.CONTROL, 1)[0] & 0x07,
@@ -60,8 +65,8 @@ TSL2591.prototype = {
     clearPersistInterrupt: () => write(this, C.ALS),
     clearAllInterrupts: () => write(this, C.INT),
     isAlsValid: () => !!(read(this, R.STATUS, 1)[0] & S.AVALID),
-    intOccured: () => !!(read(this, R.STATUS, 1)[0] & S.NPINTR),
-    persistIntOccured: () => !!(read(this, R.STATUS, 1)[0] & S.AINT),
+    hasIntOccured: () => !!(read(this, R.STATUS, 1)[0] & S.NPINTR),
+    hasPersistIntOccured: () => !!(read(this, R.STATUS, 1)[0] & S.AINT),
     getLuminosity: (light, cb) => {
         let ch0, ch1, diff = (a, b, m) => m % 2 ? a - b : [a, b][~~!!m];
 
@@ -80,5 +85,3 @@ TSL2591.prototype = {
         !np && setPersist(this, persist);
     }
 };
-
-module.exports = {LIGHT: L, GAIN: G, INTEGRATIONTIME: I, ENABLE: E, connect: i2c => new TSL2591(i2c)};
