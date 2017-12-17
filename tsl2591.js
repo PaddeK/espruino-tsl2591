@@ -23,7 +23,7 @@ const
     isValidIntegration = integration => Object.keys(I).some(i => I[i] === integration),
     handleAen = (tsl, cb) => tsl.isAlsEnabled() ? tsl.disable(E.AEN) && cb() && tsl.enable(E.AEN) : cb(),
     waitForValidAls = (tsl, cb, _) => _ = setInterval(() => tsl.isAlsValid() && !clearInterval(_) && cb.call(tsl), 10),
-    isSaturated = (ch0, ch1, int) => [ch0, ch1].indexOf([0x8FFFF, 0xFFFF][~~int]) !== -1;
+    isSaturated = (ch0, ch1, int) => [ch0, ch1].indexOf([0x8FFF, 0xFFFF][~~int]) !== -1;
 
 let TSL2591 = module.exports = function (i2c)
 {
